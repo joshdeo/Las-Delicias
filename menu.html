@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu | Las Delicias Mississauga</title>
+<meta name="description" content="The full Las Delicias menu with prices: arepas, empanadas, bandeja paisa, sancocho and more.">
+<meta name="theme-color" content="#D22F25">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,800;1,9..144,500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header id="top">
+  <div class="wrap nav">
+    <a class="logo" href="index.html"><i>L</i> Las Delicias</a>
+    <button class="burger" id="burger" aria-label="Menu">&#9776;</button>
+    <nav class="links" id="links">
+      <a href="index.html" data-i18n="nav_home">Home</a>
+      <a href="menu.html" class="active" data-i18n="nav_menu">Menu</a>
+      <a href="about.html" data-i18n="nav_about">Our Story</a>
+      <a href="visit.html" data-i18n="nav_visit">Visit</a>
+      <button class="lang" id="lang">ES</button>
+      <a class="btn red" href="tel:9052320060" style="padding:10px 20px">(905) 232 0060</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="phero">
+    <div class="wrap">
+      <span class="eyebrow" data-i18n="pm_eye">The menu</span>
+      <h1 data-i18n="pm_h">Our infinite world of delicious.</h1>
+      <p data-i18n="pm_p">Every dish with its price. Call us to place your order and it will be ready for pickup.</p>
+    </div>
+  </div>
+
+  <section class="paper" style="padding-top:40px">
+    <div class="wrap">
+      <div class="tools">
+        <div class="chips" id="chips"></div>
+        <input class="search" id="search" type="search" data-i18n-ph="search" placeholder="Search dishes">
+      </div>
+      <div id="menuOut"></div>
+      <p class="note" data-i18n="m_note">No changes to the menu are accepted. Changes carry extra charges. Prices may change by season.</p>
+      <div class="more"><a class="btn red" href="tel:9052320060" data-i18n="cta_call">Call to order</a></div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <span>&copy; 2026 Las Delicias Mississauga</span>
+  <span><a href="index.html" data-i18n="nav_home">Home</a><a href="about.html" data-i18n="nav_about">Our Story</a><a href="visit.html" data-i18n="nav_visit">Visit</a><a href="tel:9052320060">(905) 232 0060</a></span>
+</div></footer>
+
+<script src="menu.js"></script>
+<script src="main.js"></script>
+<script>
+let cat = 'all', q = '';
+function renderChips(){
+  const chips = [{id:'all',l:T[lang].all}, ...MENU.map(s=>({id:s.id,l:s[lang]}))];
+  $('#chips').innerHTML = chips.map(c=>`<button class="chip ${c.id===cat?'on':''}" data-c="${c.id}">${c.l}</button>`).join('');
+}
+function renderMenu(){
+  let html = '', any = false;
+  MENU.forEach(s=>{
+    if(cat!=='all' && cat!==s.id) return;
+    const items = s.items.filter(it=>{
+      if(!q) return true;
+      const name = typeof it.n==='string' ? it.n : it.n[lang];
+      const hay = [name, it[lang]||'', ...((it.o&&it.o[lang])||[])].join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+    if(!items.length) return;
+    any = true;
+    const other = lang==='en' ? s.es : s.en;
+    html += `<div class="msec"><h3 class="st">${s[lang]} <small>${other}</small></h3>`;
+    if(s.drinks){
+      html += `<div class="drinks">${items.map(it=>`<div class="drow"><span>${it.n[lang]}</span><b>${money(it.p)}</b></div>`).join('')}</div>`;
+    } else {
+      html += `<div class="grid">` + items.map((it,i)=>cardHTML(it, s, i, lang)).join('') + `</div>`;
+    }
+    html += `</div>`;
+  });
+  $('#menuOut').innerHTML = any ? html : `<p class="empty">${T[lang].none}</p>`;
+}
+window.onLang = function(){ renderChips(); renderMenu(); };
+document.addEventListener('click',e=>{
+  const c = e.target.closest('[data-c]');
+  if(c){ cat = c.dataset.c; renderChips(); renderMenu(); }
+});
+document.addEventListener('DOMContentLoaded',()=>{
+  $('#search').addEventListener('input',e=>{ q = e.target.value.toLowerCase().trim(); renderMenu(); });
+  const m = location.hash.replace('#','');
+  if(m && MENU.some(s=>s.id===m)){ cat = m; window.onLang(); }
+});
+</script>
+</body>
+</html>
